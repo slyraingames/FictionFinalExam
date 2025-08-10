@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Exam: Fiction Writing 101</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Using a common font for better aesthetics */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Custom styles for the quiz options to provide clear feedback */
+        .option.selected {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            border-color: #2563eb; /* blue-600 */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .option.correct {
+            background-color: #16a34a; /* green-600 */
+            color: white;
+            border-color: #15803d; /* green-700 */
+        }
+        .option.incorrect {
+            background-color: #dc2626; /* red-600 */
+            color: white;
+            border-color: #b91c1c; /* red-700 */
+        }
+        .option:not(.disabled):hover {
+            background-color: #f3f4f6; /* gray-100 */
+            border-color: #9ca3af; /* gray-400 */
+        }
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        /* A subtle transition for a smoother experience */
+        .option {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen py-12 px-4">
+
+    <div id="quiz-container" class="bg-white w-full max-w-2xl mx-auto p-6 sm:p-8 rounded-xl shadow-lg">
+        <h1 class="text-3xl font-bold text-center mb-2">Final Exam</h1>
+        <h2 class="text-xl font-semibold text-center text-slate-600 mb-8">Fiction Writing 101</h2>
+        
+        <div id="quiz-content" class="space-y-8">
+            <!-- All 27 questions will be dynamically inserted here by JavaScript -->
+        </div>
+
+        <button id="submit-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg mt-10 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 ease-in-out text-lg shadow-md hover:shadow-lg">
+            Submit Final Exam
+        </button>
+
+        <div id="results-container" class="hidden mt-8 text-center p-6 bg-slate-50 rounded-lg border border-slate-200">
+            <h3 class="text-2xl font-bold">Exam Complete!</h3>
+            <p id="score" class="text-4xl font-bold my-4 text-blue-600"></p>
+            <p id="feedback" class="text-lg text-slate-700"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- QUIZ DATA ---
+            // Combining all questions from Modules 1-9.
+            const quizData = [
+                // Module 1
+                { question: "What is the main difference between a short story and a novel?", options: [{ text: "A novel always has more than one protagonist" }, { text: "A short story is typically under 7,500 words, while a novel is over 40,000 words", correct: true }, { text: "Short stories can’t have subplots" }, { text: "Novels must be written in third person" }] },
+                { question: "Which of the following is a subgenre of speculative fiction?", options: [{ text: "Historical Romance" }, { text: "Detective Noir" }, { text: "Cyberpunk", correct: true }, { text: "Satire" }] },
+                { question: "Which element of fiction primarily drives the plot forward?", options: [{ text: "Theme" }, { text: "Setting" }, { text: "Conflict", correct: true }, { text: "Style" }] },
+                { question: "True or False: Theme is the same as the moral of the story.", options: [{ text: "True" }, { text: "False", correct: true }] },
+                // Module 2
+                { question: "Which story structure is most common in Hollywood films?", options: [{ text: "Three-Act Structure", correct: true }, { text: "Kishōtenketsu" }, { text: "Five-Act Shakespearean" }, { text: "In Media Res" }] },
+                { question: "Which best defines a subplot?", options: [{ text: "A separate story unrelated to the main plot" }, { text: "A side story that supports or contrasts with the main plot", correct: true }, { text: "A flashback used to explain character backstory" }, { text: "The first scene of the story" }] },
+                { question: "In the Hero’s Journey, what is “The Call to Adventure”?", options: [{ text: "The moment the hero defeats the villain" }, { text: "The hero’s refusal to leave home" }, { text: "The event that invites the hero into the main conflict", correct: true }, { text: "The mentor giving advice" }] },
+                { question: "True or False: Kishōtenketsu always includes a central conflict.", options: [{ text: "True" }, { text: "False", correct: true }] },
+                // Module 3
+                { question: "“A detective struggles with addiction while chasing a killer” is an example of:", options: [{ text: "Person vs. Society" }, { text: "Person vs. Self", correct: true }, { text: "Person vs. Technology" }, { text: "Person vs. Nature" }] },
+                { question: "True or False: External conflict is always more important than internal conflict.", options: [{ text: "True" }, { text: "False", correct: true }] },
+                { question: "What does “raising the stakes” mean?", options: [{ text: "Adding more characters to the plot" }, { text: "Making the consequences of failure more severe", correct: true }, { text: "Increasing the number of subplots" }, { text: "Adding more description to the setting" }] },
+                // Module 4
+                { question: "What is a “character arc”?", options: [{ text: "The order in which characters appear" }, { text: "The character’s journey of growth or change", correct: true }, { text: "A list of character traits" }, { text: "The physical path a character travels" }] },
+                { question: "True or False: Every story needs a villain.", options: [{ text: "True" }, { text: "False", correct: true }] },
+                { question: "What is a “flat arc” character?", options: [{ text: "A character who does not change but changes others around them", correct: true }, { text: "A poorly written character" }, { text: "A character with no emotional depth" }, { text: "A character with multiple conflicting goals" }] },
+                // Module 5
+                { question: "Which sense is most often neglected in descriptions?", options: [{ text: "Sight" }, { text: "Hearing" }, { text: "Smell", correct: true }, { text: "Touch" }] },
+                { question: "True or False: Worldbuilding is only for fantasy and science fiction stories.", options: [{ text: "True" }, { text: "False", correct: true }] },
+                { question: "What is an “info dump”?", options: [{ text: "A sudden revelation that changes the story’s direction" }, { text: "A large, unnecessary block of exposition given all at once", correct: true }, { text: "A suspenseful cliffhanger" }, { text: "A flashback" }] },
+                // Module 6
+                { question: "What is a motif?", options: [{ text: "A repeated element that has symbolic significance", correct: true }, { text: "The main moral lesson of the story" }, { text: "The first line of a story" }, { text: "A type of subplot" }] },
+                { question: "True or False: Theme must be stated outright in a story for readers to understand it.", options: [{ text: "True" }, { text: "False", correct: true }] },
+                { question: "Which of the following is an example of symbolism?", options: [{ text: "A storm representing emotional turmoil", correct: true }, { text: "A character shouting angrily" }, { text: "A literal description of rain" }, { text: "A map showing a journey" }] },
+                // Module 7
+                { question: "What is the main difference between third-person limited and omniscient POV?", options: [{ text: "Limited shows only one character’s thoughts; omniscient can show all", correct: true }, { text: "Omniscient has no narrator" }, { text: "Limited is always in past tense" }, { text: "Omniscient is always in present tense" }] },
+                { question: "True or False: Second-person POV is the most common narrative style.", options: [{ text: "True" }, { text: "False", correct: true }] },
+                { question: "What is an unreliable narrator?", options: [{ text: "A narrator who lies or is mistaken about events", correct: true }, { text: "A narrator who changes POV mid-story" }, { text: "A narrator who is not in the story" }, { text: "A narrator who uses slang" }] },
+                // Module 8
+                { question: "What is subtext in dialogue?", options: [{ text: "Words written in italics" }, { text: "The underlying meaning behind the spoken words", correct: true }, { text: "The first line of a conversation" }, { text: "Dialogue that describes the setting" }] },
+                { question: "True or False: Dialogue should be exactly how people speak in real life.", options: [{ text: "True" }, { text: "False", correct: true }] },
+                // Module 9
+                { question: "What is the main purpose of beta readers?", options: [{ text: "To proofread for grammar only" }, { text: "To give feedback from a reader’s perspective", correct: true }, { text: "To help with marketing" }, { text: "To co-write the story" }] },
+                { question: "True or False: You should edit while writing your first draft.", options: [{ text: "True" }, { text: "False", correct: true }] }
+            ];
+
+            const quizContent = document.getElementById('quiz-content');
+            const submitBtn = document.getElementById('submit-btn');
+            const resultsContainer = document.getElementById('results-container');
+            const scoreEl = document.getElementById('score');
+            const feedbackEl = document.getElementById('feedback');
+            
+            function renderQuiz() {
+                let quizHTML = "";
+                quizData.forEach((q, questionIndex) => {
+                    quizHTML += `
+                        <div class="question-block border-t border-slate-200 pt-6 first:border-t-0 first:pt-0">
+                            <p class="text-lg font-semibold mb-4">${questionIndex + 1}. ${q.question}</p>
+                            <div class="options-container space-y-3" data-question-index="${questionIndex}">
+                                ${renderOptions(q.options, questionIndex)}
+                            </div>
+                        </div>
+                    `;
+                });
+                quizContent.innerHTML = quizHTML;
+            }
+
+            function renderOptions(options, questionIndex) {
+                let optionsHTML = "";
+                options.forEach((option, optionIndex) => {
+                    optionsHTML += `
+                        <button class="option w-full text-left p-4 border-2 border-slate-300 rounded-lg" data-question-index="${questionIndex}" data-option-index="${optionIndex}">
+                            ${option.text}
+                        </button>
+                    `;
+                });
+                return optionsHTML;
+            }
+
+            quizContent.addEventListener('click', (e) => {
+                if (e.target.classList.contains('option') && !e.target.classList.contains('disabled')) {
+                    const questionIndex = e.target.dataset.questionIndex;
+                    const allOptionsInGroup = document.querySelectorAll(`.option[data-question-index="${questionIndex}"]`);
+                    allOptionsInGroup.forEach(opt => opt.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                }
+            });
+
+            submitBtn.addEventListener('click', () => {
+                let score = 0;
+                const allOptions = document.querySelectorAll('.option');
+
+                quizData.forEach((q, questionIndex) => {
+                    const selectedOptionEl = document.querySelector(`.option.selected[data-question-index="${questionIndex}"]`);
+                    if (selectedOptionEl) {
+                        const optionIndex = parseInt(selectedOptionEl.dataset.optionIndex);
+                        if (q.options[optionIndex].correct) {
+                            score++;
+                            selectedOptionEl.classList.add('correct');
+                        } else {
+                            selectedOptionEl.classList.add('incorrect');
+                            const correctIndex = q.options.findIndex(opt => opt.correct);
+                            const correctOptionEl = document.querySelector(`.option[data-question-index="${questionIndex}"][data-option-index="${correctIndex}"]`);
+                            correctOptionEl.classList.add('correct');
+                        }
+                    } else {
+                         const correctIndex = q.options.findIndex(opt => opt.correct);
+                         const correctOptionEl = document.querySelector(`.option[data-question-index="${questionIndex}"][data-option-index="${correctIndex}"]`);
+                         correctOptionEl.classList.add('correct');
+                         correctOptionEl.classList.add('selected');
+                    }
+                });
+
+                allOptions.forEach(opt => opt.classList.add('disabled'));
+                scoreEl.textContent = `${score} / ${quizData.length}`;
+                feedbackEl.textContent = getFeedbackMessage(score, quizData.length);
+                resultsContainer.classList.remove('hidden');
+                submitBtn.style.display = 'none';
+                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+
+            function getFeedbackMessage(score, total) {
+                const percentage = (score / total) * 100;
+                if (percentage >= 90) return "Outstanding! You have a comprehensive understanding of the craft. You're ready to write!";
+                if (percentage >= 75) return "Excellent work! You have a solid grasp of all the core concepts of fiction writing.";
+                if (percentage >= 50) return "Good job! You've learned a lot. Identify the areas you missed and review those modules to solidify your knowledge.";
+                return "You've completed the course, and that's a huge accomplishment! Now you know which areas to focus on as you continue your writing journey.";
+            }
+
+            renderQuiz();
+        });
+    </script>
+
+</body>
+</html>
